@@ -4,16 +4,23 @@
     "name": "HackerNews",
     "description": "Read the top stories on HackerNews",
     "developer_name": "Diogo Xavier",
-    "icon": "images/Dark-Icon.png",
+    "icon": "images/hackernews.png",
     "options": {
-        "query_debounce": 0.05
+        "query_debounce": 1
     },
     "preferences": [
         {
-            "id": "trigger_key",
+            "id": "keyword",
             "type": "keyword",
             "name": "Keyword",
             "default_value": "hn"
+        },
+        {
+            "id": "open_mode",
+            "type": "select",
+            "name": "Open Article's",
+            "options": ["Comment Section", "URL"],
+            "default_value": "Comment Section"
         }
     ]
 }
