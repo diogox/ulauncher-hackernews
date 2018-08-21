@@ -1,0 +1,19 @@
+{
+    "manifest_version": "1",
+    "api_version": "1",
+    "name": "HackerNews",
+    "description": "Read the top stories on HackerNews",
+    "developer_name": "Diogo Xavier",
+    "icon": "images/Dark-Icon.png",
+    "options": {
+        "query_debounce": 0.05
+    },
+    "preferences": [
+        {
+            "id": "trigger_key",
+            "type": "keyword",
+            "name": "Keyword",
+            "default_value": "hn"
+        }
+    ]
+}
