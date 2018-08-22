@@ -10,11 +10,13 @@ from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAct
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
 
 logger = logging.getLogger(__name__)
 
 import datetime
 
+# TODO: Certain items of an extended length can be impossible to read because they get truncated
 class HackernewsExtension(Extension):
 
     def __init__(self):
@@ -24,7 +26,7 @@ class HackernewsExtension(Extension):
         self.SHOW_AMOUNT = 5
 
         # API limit of stories (A multiple of the SHOW_AMOUNT constant is best)
-        self.LIMIT_STORIES = 10
+        self.LIMIT_STORIES = 15
 
         # Refresh rate (in minutes) for cached data
         self.REFRESH_RATE = 5
@@ -33,9 +35,10 @@ class HackernewsExtension(Extension):
         from hackernews import HackerNews
         self.hn_api = HackerNews()
 
-        # Cache Top Stories
-        self.cached_data = {}
-        self.load_and_cache_data()
+        self.cached_data = {
+            "stories": []
+        }
+        #self.load_and_cache_data()
 
         # Subscribe to events
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
@@ -43,10 +46,19 @@ class HackernewsExtension(Extension):
         self.subscribe(PreferencesEvent, PreferencesEventListener())
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
 
-    def load_and_cache_data(self):
+    def load_and_cache_data(self, until_story_index = -1):
 
         # Get story ids
-        stories_ids = self.hn_api.top_stories(limit=self.LIMIT_STORIES)
+        limit = self.LIMIT_STORIES
+        if until_story_index >= 0:
+            limit = until_story_index + self.LIMIT_STORIES
+
+        stories_ids = self.hn_api.top_stories(limit=limit)
+
+        # Check for connection issues
+        if not stories_ids:
+            raise NameError('ConnectionError')
+
         now = datetime.datetime.now() + datetime.timedelta(seconds = 60 * 3.4)
         
         # Get stories
@@ -91,19 +103,26 @@ class HackernewsExtension(Extension):
         end_value = (self.SHOW_AMOUNT * load_page_number)
         start_value = end_value - (self.SHOW_AMOUNT)
 
+        # Check if needed stories are not cached
+        if len( self.cached_data["stories"] ) < end_value:
+            self.load_and_cache_data(end_value)
+
         # Get how many minutes old the cached data is
         cache_days_old = (now-self.cached_data["cached_at"]).days
         cache_minutes_old = cache_days_old * 24 * 60
 
         # Get stories (Use cached data if not older than specified constant)
         if cache_minutes_old >= self.REFRESH_RATE:
-            self.load_and_cache_data()
+            try:
+                self.load_and_cache_data()
+            except NameError:
+                raise
         else:
             stories = self.cached_data["stories"]
         
         # Add the top 5 stories to be displayed
         for i in range(start_value, end_value):
-            # TODO : Check if i is out of range, if so, load and cache the next batch.
+            # TODO : Check if it is out of range, if so, load and cache the next batch.
             story = stories[i]
             logger.debug('ITEM: %s' % story)
 
@@ -131,10 +150,10 @@ class HackernewsExtension(Extension):
                                 on_enter=OpenUrlAction(story_url)))
         
         items.append(ExtensionResultItem(icon='images/next.png',
-                                name='5 More Stories!',
+                                name='%s More Stories!' % str( self.SHOW_AMOUNT ),
                                 description="The same as running 'hn %s'" % str(load_page_number + 1),
                                 highlightable=True,
-                                on_enter=SetUserQueryAction( 'hn %s' % str(load_page_number + 1) )))
+                                on_enter=SetUserQueryAction( 'hn %s' % str( load_page_number + 1 ) )))
 
         return RenderResultListAction(items)
 
@@ -145,6 +164,7 @@ class KeywordQueryEventListener(EventListener):
         # (Eg. Page 2 - when we show 5 stories at a time - will show stories number 6-10)
         page_number = event.get_argument()
 
+        # TODO: Check for invalid inputs like 'hn 1 2'
         # If the argument is not a digit, it's invalid
         # Otherwise, if it's non-existent, it defaults to 1
         # Any other digit is treated as apage number
@@ -155,7 +175,15 @@ class KeywordQueryEventListener(EventListener):
             # Show, and return, error message
             pass
 
-        return extension.show_top_stories( int(page_number) )
+        try:
+            return extension.show_top_stories( int(page_number) )
+        except NameError('ConnectionError'):
+            logger.info('!!!!Displaying Error')
+            return ExtensionResultItem(icon='images/story.png',
+                                name="Couldn't Fetch Stories!",
+                                description="Please check you Internet Connection.",
+                                highlightable=False,
+                                on_enter=DoNothingAction())
 
 class PreferencesEventListener(EventListener):
 

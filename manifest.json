@@ -6,7 +6,7 @@
     "developer_name": "Diogo Xavier",
     "icon": "images/hackernews.png",
     "options": {
-        "query_debounce": 1
+        "query_debounce": 0.1
     },
     "preferences": [
         {
