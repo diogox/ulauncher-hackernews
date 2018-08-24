@@ -21,6 +21,26 @@
             "name": "Open Article's",
             "options": ["Comment Section", "URL"],
             "default_value": "Comment Section"
+        },
+        {
+            "id": "cache_increment",
+            "type": "input",
+            "name": "Cache Increment",
+            "description": "Amount of stories to cache ahead each time a request needs to be made to the API.",
+            "default_value": "10"
+        },
+        {
+            "id": "cache_refresh_rate",
+            "type": "input",
+            "name": "Cache Refresh Rate",
+            "description": "Limit amount of time the caches is to be kept useable. (in minutes)",
+            "default_value": "10"
+        },
+        {
+            "id": "item_amount",
+            "type": "input",
+            "name": "Items to Show",
+            "default_value": "5"
         }
     ]
 }
