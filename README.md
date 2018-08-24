@@ -6,7 +6,6 @@ Warning: Right now the extension is working. However, it is missing a lot of imp
 
 For this extension to work, install the following modules:
 ```
-    pip install --user haxor==0.6
     pip install --user timeago
     pip install --user datetime
 ```

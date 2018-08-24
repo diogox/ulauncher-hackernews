@@ -1,4 +1,3 @@
-from hackernews import HackerNews
 from preferences import Preferences
 
 from threading import Thread
