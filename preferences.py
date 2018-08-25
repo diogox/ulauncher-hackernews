@@ -7,8 +7,6 @@ class Preferences:
     ITEM_AMOUNT = ''
 
     def set_preferences(self, preferences):
-        # Save preferences reference
-        self.source = preferences
 
         # Save values as members
         self.load(preferences)
@@ -31,9 +29,21 @@ class Preferences:
             self.CACHE_INCREMENT = int( preferences["cache_increment"] )
 
 
-    def update(self):
+    def update(self, item_id, new_value):
         """ 
         Updates the internal reference to 
         the values in the preferences 
         """
-        self.load( self.source )
+        if item_id == "keyword":
+            self.KEYWORD = new_value
+        elif item_id == "open_mode":
+            self.OPEN_MODE = new_value
+        elif item_id == "cache_refresh_rate":
+            self.CACHE_REFRESH_RATE = int(new_value)
+        elif item_id == "item_amount":
+            self.ITEM_AMOUNT = int(new_value)
+        
+        if self.CACHE_REFRESH_RATE == 0:
+            # If there is no cache, there's no need to cache pages ahead
+            # Only load the current one
+            self.CACHE_INCREMENT = 1

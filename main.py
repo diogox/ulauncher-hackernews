@@ -95,8 +95,8 @@ class PreferencesEventListener(EventListener):
 class PreferencesUpdateEventListener(EventListener):
     
     def on_event(self, event, extension):
-        extension._preferences.update()
-
+        extension._preferences.update(event.id, event.new_value)
+        logger.info("PREFERENCES: %s" % extension._preferences.CACHE_REFRESH_RATE)
         # Distribute preferences 
         extension._hn.set_preferences(extension._preferences) 
         extension._screens.set_preferences(extension._preferences)
