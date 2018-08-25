@@ -25,9 +25,9 @@
         {
             "id": "cache_increment",
             "type": "input",
-            "name": "Cache Increment",
-            "description": "Amount of stories to cache ahead each time a request needs to be made to the API.",
-            "default_value": "10"
+            "name": "Pages to Cache in Advance",
+            "description": "Amount of pages to cache ahead each time a request needs to be made to the API. It includes the current page you load.",
+            "default_value": "4"
         },
         {
             "id": "cache_refresh_rate",

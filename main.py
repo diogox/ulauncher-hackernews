@@ -46,10 +46,16 @@ class HackernewsExtension(Extension):
             return RenderResultListAction(cached_page)
         else:
             stories = self._hn.load_top_stories(load_page_number)
-            items = self._screens.render_top_stories(stories, load_page_number)
+            items = self._screens.render_top_stories(stories[0], load_page_number)
             
-            # Cache items
+            # Cache first item
             self._cache.add_page(load_page_number, items)
+
+            # Cache items
+            for i in range( 1, len(stories) ):
+                page_number = load_page_number + i
+                current_items = self._screens.render_top_stories(stories[i], page_number)
+                self._cache.add_page(page_number, current_items)
 
         return RenderResultListAction(items)
 
@@ -92,12 +98,10 @@ class PreferencesUpdateEventListener(EventListener):
         extension._preferences.update()
 
         # Distribute preferences 
-        """
         extension._hn.set_preferences(extension._preferences) 
         extension._screens.set_preferences(extension._preferences)
         extension._cache.set_refresh_rate(extension._preferences.CACHE_REFRESH_RATE)
         extension._cache.set_items_per_page(extension._preferences.ITEM_AMOUNT)
-        """
 
 if __name__ == '__main__':
     HackernewsExtension().run()

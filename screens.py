@@ -46,7 +46,7 @@ class Screens:
 
         # Item to get to the neext page
         items.append(ExtensionResultItem(icon='images/next.png',
-                                name='%s More Stories!' % str( self.preferences.ITEM_AMOUNT ),
+                                name='Load Next Page!',
                                 description="The same as running 'hn %s'" % str( page_number + 1 ),
                                 highlightable=True,
                                 on_enter=SetUserQueryAction( 'hn %s' % str( page_number + 1 ) )))

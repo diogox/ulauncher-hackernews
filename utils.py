@@ -5,6 +5,11 @@ def get_current_time():
     return now
 
 def get_time_difference_in_minutes(older, newer):
-    days = (newer-older).days
-    minutes = days * 24 * 60
+    seconds = (newer-older).seconds
+    minutes = seconds / 60.0
     return minutes
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in xrange(0, len(l), n):
+        yield l[i:i + n]
