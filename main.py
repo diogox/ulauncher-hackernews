@@ -74,9 +74,13 @@ class KeywordQueryEventListener(EventListener):
         # Otherwise, if it's non-existent, it defaults to 1
         # Any other digit is treated as a page number
         if argument is None:
-            return
-        
+            # If there are no arguments, default for a hard-coded 'top' subcommand
+            # TODO: Add a preference to choose the default subcommand
+            # Right now, the 'open' subcommand is defaulting to 'top' stories aswell. (Maybe have 'new' in the future)
+            argument = 'top'
+
         arguments = argument.split()
+
         if arguments[0] == 'top':
             if len(arguments) >= 2:
                 if arguments[1].isdigit():
