@@ -36,6 +36,7 @@ class HackernewsExtension(Extension):
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(PreferencesEvent, PreferencesEventListener()) # Set preferences to inner members
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
+        self.subscribe(ItemEnterEvent, ItemEnterEventListener())
 
     def show_top_stories(self, load_page_number):
 
@@ -59,24 +60,53 @@ class HackernewsExtension(Extension):
 
         return RenderResultListAction(items)
 
+    def show_open_confirmation(self, number_of_links):
+        confirmation = self._screens.render_open_confirmation(number_of_links)
+        return RenderResultListAction(confirmation)
+
 class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
-        page_number = event.get_argument()
+        argument = event.get_argument()
 
         # TODO: Check for invalid inputs like 'hn 1 2'
         # If the argument is not a digit, it's invalid
         # Otherwise, if it's non-existent, it defaults to 1
-        # Any other digit is treated as apage number
-        if not page_number:
-            # If no page is specified, assume first page
-            page_number = 1
-        elif not page_number.isdigit():
-            # Show, and return, error message
-            pass
+        # Any other digit is treated as a page number
+        if argument is None:
+            return
+        
+        arguments = argument.split()
+        if arguments[0] == 'top':
+            if len(arguments) >= 2:
+                if arguments[1].isdigit():
+                    page_number = arguments[1]
+                else:
+                    # TODO: Show error message
+                    logger.info("********ERROR************ - %s" % argument)
+                    return
+            else:
+                # Assume first page
+                page_number = 1
+            
+            # TODO: Display error when there is no connection
+            return extension.show_top_stories( int(page_number) )
+        elif arguments[0] == 'open':
+            if len(arguments) != 2:
+                # TODO: Show error message
+                logger.info("ERROR. Open number doesn't exist!")
+                return
+            
+            number_of_links = arguments[1]
+            if not number_of_links.isdigit():
+                # TODO: Show error message
+                logger.info("ERROR. Open number not digit!")
+                return
+            else:
+                number_of_links = int(number_of_links)
 
-        # TODO: Display error when there is no connection
-        return extension.show_top_stories( int(page_number) )
+            # Open the first links of top stories, equal to the number inputed
+            return extension.show_open_confirmation(number_of_links)
 
 class PreferencesEventListener(EventListener):
 
@@ -102,6 +132,28 @@ class PreferencesUpdateEventListener(EventListener):
         extension._screens.set_preferences(extension._preferences)
         extension._cache.set_refresh_rate(extension._preferences.CACHE_REFRESH_RATE)
         extension._cache.set_items_per_page(extension._preferences.ITEM_AMOUNT)
+
+class ItemEnterEventListener(EventListener):
+    
+    def on_event(self, event, extension):
+        # This is activated upon clicking an item with a custom action
+        # currently only used for opening a certain number of top stories
+        import math
+        import webbrowser
+        number_of_links = event.get_data()
+
+        n_of_pages = int(math.ceil(int(number_of_links) / float(extension._preferences.ITEM_AMOUNT)))
+        # Load needed pages
+        pages = extension._hn.load_top_stories(n_of_pages)
+        logger.info('Numer of PAGES: %d' % n_of_pages)
+        
+        # Open the amount needed
+        counter = 0
+        for page in pages:
+            for story in page:
+                if counter < number_of_links:
+                    webbrowser.open(story.url)
+                    counter += 1
 
 if __name__ == '__main__':
     HackernewsExtension().run()

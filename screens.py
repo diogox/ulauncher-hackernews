@@ -1,6 +1,7 @@
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 import utils
 
 class Screens:
@@ -49,6 +50,13 @@ class Screens:
                                 name='Load Next Page!',
                                 description="The same as running 'hn %s'" % str( page_number + 1 ),
                                 highlightable=True,
-                                on_enter=SetUserQueryAction( 'hn %s' % str( page_number + 1 ) )))
+                                on_enter=SetUserQueryAction( 'hn top %s' % str( page_number + 1 ) )))
 
         return items
+
+    def render_open_confirmation(self, number_of_links):
+        # TODO: Change icon to something related to opening urls
+        return [ ExtensionResultItem(icon='images/story.png',
+                                name="Open the top %d stories!" % number_of_links,
+                                highlightable=True,
+                                on_enter=ExtensionCustomAction(number_of_links)) ]
