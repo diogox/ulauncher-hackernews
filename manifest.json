@@ -12,7 +12,7 @@
         {
             "id": "keyword",
             "type": "keyword",
-            "name": "Keyword",
+            "name": "HackerNews",
             "default_value": "hn"
         },
         {

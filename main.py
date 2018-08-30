@@ -156,7 +156,7 @@ class ItemEnterEventListener(EventListener):
         for page in pages:
             for story in page:
                 if counter < number_of_links:
-                    webbrowser.open(story.url)
+                    webbrowser.open(story.url, new=1)
                     counter += 1
 
 if __name__ == '__main__':
